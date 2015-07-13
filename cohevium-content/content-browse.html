@@ -2,48 +2,7 @@
 <div class="row">
     <div class="col s3"> <!-- SIDE MENU { -->
 
-        <!-- Dropdown Trigger -->
-        <a class='dropdown-button btn' href='#' data-activates='workspace-el' style="width:100%">Workspaces!</a>
-        <!-- Dropdown Structure -->
-        <ul id='workspace-el' class='dropdown-content'>
-            <li><a href="#!">Korean</a></li>
-            <li><a href="#!">US-West Coast</a></li>
-            <li class="divider"></li>
-            <li><a href="#!">Chinese</a></li>
-        </ul>
-
-
-        <ul class="collapsible" data-collapsible="accordion">
-            <li>
-                <div class="collapsible-header"><i class="mdi-action-bookmark"></i>Favorite</div>
-                <div class="collapsible-body">
-                    <ul>
-                        <li>My Favorite content</li>
-                    </ul>
-                </div>
-            </li>
-            <li>
-                <div class="collapsible-header active"><i class="mdi-file-folder"></i>Root contents</div>
-                <div class="collapsible-body">
-
-                    <div class="row">
-                        <form class="col s12">
-                            <div class="input-field tight">
-                                <input id="code" type="text" >
-                                <label for="title">Code</label>
-                            </div>
-                            <div class="input-field tight">
-                                <input id="title" type="text" class="validate">
-                                <label for="title">Title</label>
-                            </div>
-                        </form>
-                    </div>
-
-                    <div id="content-root-table"></div>
-
-                </div>
-            </li>
-        </ul>
+        <div id="content-root-table"></div>
     </div> <!-- } SIDE MENU -->
 
     <div class="col s9"> <!-- CONTENT PANE { -->
@@ -84,8 +43,8 @@
     var React = require('react/addons');
     var clientapp = require('clientapp');
 
-    var ContentCollectionView = require('contentcollection-view').ContentCollectionView;
     var ContentTreeView = require('contenttree-view').ContentTreeView;
+    var ContentNavigatorComponent = require('contentnavigator-component').ContentNavigatorComponent;
 
     var appSettings = {
         rootUrl: 'http://localhost:9099'
@@ -96,19 +55,10 @@
 
     var contentService = clientApp.getContentService();
 
-    // Populate the root nodes
-    contentService.queryNodes()
-            .then(function(data){
-                var contentRootTableEl = document.getElementById('content-root-table');
-                var contentTableView = new ContentCollectionView({collection: data, el:contentRootTableEl, componentType: 'table'});
-                contentTableView.render();
-
-                console.log('list:', data.toJSON());
-            })
-            .catch(function(error){
-                console.log(error);
-                Materialize.toast('Error while querying nodes: ' + JSON.stringify(error), 4000);
-            });
+    var contentRootTableEl = document.getElementById('content-root-table');
+    clientApp.createAndRenderComponent(ContentNavigatorComponent, contentRootTableEl, {
+        app: clientApp
+    });
 
 
     var router = clientApp.createRouter({

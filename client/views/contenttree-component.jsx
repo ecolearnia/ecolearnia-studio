@@ -99,7 +99,8 @@ export class ContentTreeComponent extends React.Component
         var classObj;
 
         var currNode = this.props.node;
-        if (currNode.body.subnodes != null) {
+        if (currNode.body.subnodes != null &&
+            currNode.body.subnodes.length > 0) {
             childNodes = currNode.body.subnodes.map(function(node, index) {
                 return (
                     <li key={index}>
@@ -134,6 +135,10 @@ export class ContentTreeComponent extends React.Component
                 "togglable-down": this.state.visible,
                 "togglable-up": !this.state.visible
             };
+        }
+        if (!childNodes) {
+            // If no children, create linke
+            childNodes = <li title="add after"><a href={"content-edit.html#item/_new_/parent=" + currNode.uuid}>New Item</a></li>
         }
 
         var style;

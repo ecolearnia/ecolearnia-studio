@@ -42,17 +42,20 @@ internals.ContentTableComponent = React.createClass({
     {
         var contentNodes = this.props.contentNodes;
 
-        var tableRows = contentNodes.map(function(contentNode) {
-            return (
-                <tr>
-                    <td><a href={"#content/" + contentNode.uuid}>{contentNode.uuid}</a></td>
-                    <td>{contentNode.metadata.title}</td>
-                </tr>
-            )
-        });
+        var tableRows = '';
+        if (contentNodes){
+            tableRows = contentNodes.map(function(contentNode) {
+                return (
+                    <tr>
+                        <td><a href={"#content/" + contentNode.uuid}>{contentNode.uuid}</a></td>
+                        <td>{contentNode.metadata.title}</td>
+                    </tr>
+                )
+            });
+        }
 
         return (
-            <table>
+            <table className="striped">
                 <thead>
                     <tr>
                         <th width="20">Lc</th>

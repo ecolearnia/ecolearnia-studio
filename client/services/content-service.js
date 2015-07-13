@@ -64,6 +64,7 @@ internals.ContentService.prototype.createNode = function(parentUuid) {
 
     var newNode = contentnodemodel.createContentNode(this.rootUrl + '/nodes');
     newNode.set({
+        kind: 'container',
         parentUuid: parentUuid,
         metadata: internals.metadataTemplate,
         body: {
@@ -81,7 +82,7 @@ internals.ContentService.prototype.createNode = function(parentUuid) {
  * @param criteria
  * @returns {Promise}
  */
-internals.ContentService.prototype.queryNodes = function(criteria)
+internals.ContentService.prototype.queryNodes = function(criteria, limit, page)
 {
     var promise = promiseutils.createPromise( function(resolve, reject) {
 
@@ -101,8 +102,20 @@ internals.ContentService.prototype.queryNodes = function(criteria)
             }
         }
 
+        if (!limit) {
+            limit = 20;
+        }
+        var data = {
+            q: criteria,
+            _limit: limit
+        };
+
+        if (page) {
+            data.page = page;
+        }
+
         contentNodes.fetch({
-            //data: {page: 3},
+            data: data,
             success: successCallback,
             error: errorCallback
         });
@@ -218,13 +231,11 @@ internals.ContentService.prototype.moveNode = function(uuid, to)
 
         var url = this.getNodeBaseUrl() + '/' + uuid + '/move';
 
-
         $.ajax({
             url: url
         }).done(function() {
             $( this ).addClass( "done" );
         });
-
 
     }.bind(this));
 
@@ -360,6 +371,7 @@ internals.ContentService.prototype.createItem = function(parentUuid) {
         }
     };
     newItem.set({
+        kind: 'item',
         parentUuid: parentUuid,
         metadata: internals.metadataTemplate,
         body: body

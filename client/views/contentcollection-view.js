@@ -8,6 +8,8 @@
 /**
  * EcoLearnia v0.0.1
  *
+ * @deprecated - use contentnavigator-component insteadß
+ *
  * @fileoverview
  *  This file includes definition of ContentCollectionView.
  *
