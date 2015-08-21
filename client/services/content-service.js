@@ -88,6 +88,21 @@ internals.ContentService.prototype.queryNodes = function(criteria, limit, page)
 
         var contentNodes = contentnodemodel.createContentNodeCollection(this.rootUrl + '/nodes');
 
+        if (!limit) {
+            limit = 20;
+        }
+        var data = {
+            q: criteria,
+            _limit: limit
+        };
+
+        if (!page) {
+            page = 0;
+        }
+        if (page) {
+            data.page = page;
+        }
+        /*
         function successCallback(collection, response, options) {
             resolve(collection);
         }
@@ -102,23 +117,23 @@ internals.ContentService.prototype.queryNodes = function(criteria, limit, page)
             }
         }
 
-        if (!limit) {
-            limit = 20;
-        }
-        var data = {
-            q: criteria,
-            _limit: limit
-        };
-
-        if (page) {
-            data.page = page;
-        }
-
         contentNodes.fetch({
             data: data,
             success: successCallback,
             error: errorCallback
         });
+        */
+
+        var url = this.rootUrl + '/nodes?_limit=' + limit + '&_page=' + page + '&q=' + encodeURIComponent(criteria)
+        $.ajax({
+            method: 'GET',
+            url: url
+        }).done(function(data, textStatus, jqXHR) {
+            resolve(data);
+        }).fail(function(jqXHR, textStatus, errorThrown) {
+            reject(errorThrown);
+        });
+
 
     }.bind(this));
 
@@ -227,14 +242,24 @@ internals.ContentService.prototype.deleteNode = function(uuid)
  */
 internals.ContentService.prototype.moveNode = function(uuid, to)
 {
+    // @todo - testme
     var promise = promiseutils.createPromise( function(resolve, reject) {
 
-        var url = this.getNodeBaseUrl() + '/' + uuid + '/move';
+        var url = this.rootUrl + '/nodes/' + uuid + '/move';
+
+        var body = {
+            parentUuid: to.parentUuid,
+            position: to.position,
+        };
 
         $.ajax({
-            url: url
-        }).done(function() {
-            $( this ).addClass( "done" );
+            method: 'PUT',
+            url: url,
+            data: body
+        }).done(function(data, textStatus, jqXHR) {
+            resolve(data);
+        }).fail(function(jqXHR, textStatus, errorThrown) {
+            reject(errorThrown);
         });
 
     }.bind(this));

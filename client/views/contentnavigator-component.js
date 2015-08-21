@@ -16,6 +16,7 @@
  */
 
 var React = require('react');
+var lodash = require('lodash');
 
 var ContentTableComponent = require ('./contenttable-component.jsx').ContentTableComponent;
 
@@ -41,6 +42,9 @@ export class ContentNavigatorComponent extends React.Component
         this.retrieveNodes_ = this.retrieveNodes_.bind(this);
 
         this.state = {
+            totalHits: 0,
+            page: 0,
+            pageSize: this.props.pageSize,
             contentNodes: null
         };
     }
@@ -50,9 +54,10 @@ export class ContentNavigatorComponent extends React.Component
 
     }
 
-
     render()
     {
+        var totalPages = Math.ceil(this.state.totalHits / this.props.pageSize);
+        var pagesNums = lodash.range(0, totalPages);
 
         return (
             <div className={this.props.rootClass} >
@@ -97,6 +102,9 @@ export class ContentNavigatorComponent extends React.Component
 
                             <ContentTableComponent contentNodes={this.state.contentNodes} />
 
+                            <ul className="pagination">
+                                {pagesNums.map(this.renderPageLink, this)}
+                            </ul>
                         </div>
                     </li>
                 </ul>
@@ -104,8 +112,16 @@ export class ContentNavigatorComponent extends React.Component
         );
     }
 
+    renderPageLink (n, i) {
+        var cls = this.state.page === n ? 'active' : '';
+        return (
+            <li key={i} className={cls} >
+                <a href='#' onClick={this.changePage_.bind(this, n)}>{n}</a>
+            </li>
+        );
+    }
 
-    handleChange_(field, e)
+    buildCriteriaFromFields()
     {
         var criteriaEl = [];
         var searchCode = this.refs.searchCode.getDOMNode().value;
@@ -118,9 +134,22 @@ export class ContentNavigatorComponent extends React.Component
             criteriaEl.push('metadata.title LIKE "' + searchTitle + '%"');
         }
 
-        var criteria = criteriaEl.join( ' AND ');
+        return criteriaEl.join( ' AND ');
+    }
+
+    handleChange_(field, e)
+    {
+        var criteria = this.buildCriteriaFromFields();
 
         this.retrieveNodes_(criteria);
+    }
+
+    changePage_(page, e)
+    {
+        e.preventDefault();
+        var criteria = this.buildCriteriaFromFields();
+
+        this.retrieveNodes_(criteria, page);
     }
 
     retrieveNodes_(criteria, page)
@@ -128,8 +157,13 @@ export class ContentNavigatorComponent extends React.Component
         var self = this;
 
         this.props.app.getContentService().queryNodes(criteria, this.props.pageSize, page)
-            .then ( function(nodes) {
-            self.setState({contentNodes: nodes});
+        .then ( function(result) {
+            self.setState({
+                totalHits: result.totalHits,
+                page: page,
+                pageSize: self.props.pageSize,
+                contentNodes: result.documents
+            });
         })
         .catch( function(error) {
             self.props.app.showMessage('Error', 'Error fetching nodes: ' + JSON.stringify(error));
